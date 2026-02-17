@@ -1,0 +1,20 @@
+[package]
+name = "ov-napi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ov-core = { path = "../ov-core" }
+ov-storage = { path = "../ov-storage" }
+ov-session = { path = "../ov-session" }
+napi = { version = "2", features = ["async", "serde-json"] }
+napi-derive = "2"
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[build-dependencies]
+napi-build = "2"
