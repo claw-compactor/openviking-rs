@@ -1,0 +1,21 @@
+{
+  "name": "@openviking/engine",
+  "version": "0.1.0",
+  "description": "OpenViking Rust engine - napi-rs bindings",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "napi": {
+    "name": "openviking-engine",
+    "triples": {
+      "defaults": false,
+      "additional": ["aarch64-apple-darwin"]
+    }
+  },
+  "scripts": {
+    "build": "napi build --platform --release",
+    "build-debug": "napi build --platform"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.0"
+  }
+}
