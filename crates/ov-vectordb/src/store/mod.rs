@@ -6,7 +6,7 @@ mod bytes_row;
 
 pub use kv::{KvStore, MemoryKvStore};
 pub use file_store::FileStore;
-pub use bytes_row::{BytesRow, FieldSchema, SchemaFieldType};
+pub use bytes_row::{BytesRow, BytesRowSchema, FieldSchema, SchemaFieldType};
 
 use std::collections::BTreeMap;
 use parking_lot::RwLock;
