@@ -645,6 +645,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ov-compactor"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "regex",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "ov-core"
 version = "0.1.0"
 dependencies = [
@@ -679,8 +691,21 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "ov-core",
+ "regex",
  "serde",
  "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "ov-router"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "tokio",
  "tracing",
 ]
 
@@ -706,9 +731,10 @@ dependencies = [
  "anyhow",
  "chrono",
  "ov-core",
- "ov-storage",
+ "regex",
  "serde",
  "serde_json",
+ "thiserror 2.0.18",
  "tokio",
  "tracing",
  "uuid",

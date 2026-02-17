@@ -5,6 +5,8 @@ members = [
   "crates/ov-storage",
   "crates/ov-parser",
   "crates/ov-session",
+  "crates/ov-compactor",
+  "crates/ov-router",
   "crates/ov-server",
   "crates/ov-napi",
 ]
@@ -21,3 +23,4 @@ axum = "0.8"
 async-trait = "0.1"
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
+regex = "1"
