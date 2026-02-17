@@ -8,6 +8,12 @@ pub struct TransactionManager {
     active: Mutex<HashMap<String, TransactionRecord>>,
 }
 
+impl Default for TransactionManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TransactionManager {
     pub fn new() -> Self {
         Self { active: Mutex::new(HashMap::new()) }

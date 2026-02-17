@@ -4,6 +4,7 @@ use ov_core::context::Context;
 use std::sync::Arc;
 use ov_vectordb::VectorIndex;
 
+#[allow(dead_code)]
 pub struct AgFs {
     index: Arc<dyn VectorIndex>,
 }

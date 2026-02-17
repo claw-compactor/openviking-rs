@@ -11,3 +11,10 @@ serde_json = { workspace = true }
 tracing = { workspace = true }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+rand = "0.8"
+parking_lot = "0.12"
+ordered-float = "4"
+byteorder = "1"
+tempfile = "3"
