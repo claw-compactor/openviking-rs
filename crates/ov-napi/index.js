@@ -310,12 +310,18 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { ping, compress, compressDetailed, route, createSession, vectorSearch, searchContext } = nativeBinding
+const { ping, addMemory, searchMemory, createSession, getSession, listSessions, addSessionMessage, closeSession, compress, compressDetailed, route, vectorSearch, extractMemories } = nativeBinding
 
 module.exports.ping = ping
+module.exports.addMemory = addMemory
+module.exports.searchMemory = searchMemory
+module.exports.createSession = createSession
+module.exports.getSession = getSession
+module.exports.listSessions = listSessions
+module.exports.addSessionMessage = addSessionMessage
+module.exports.closeSession = closeSession
 module.exports.compress = compress
 module.exports.compressDetailed = compressDetailed
 module.exports.route = route
-module.exports.createSession = createSession
 module.exports.vectorSearch = vectorSearch
-module.exports.searchContext = searchContext
+module.exports.extractMemories = extractMemories
