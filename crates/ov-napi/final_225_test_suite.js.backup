@@ -77,7 +77,7 @@ try {
   assert(false, 'Memory 46: Empty content should be rejected');
   trackCategory('Memory CRUD', false);
 } catch (e) {
-  assert(true, `Memory 46: Empty content error - ${e.message}`); // Error expected and caught
+  assert(false, `Memory 46: Empty content error - ${e.message}`); // This should fail
   trackCategory('Memory CRUD', false);
 }
 
@@ -88,7 +88,7 @@ try {
   assert(false, 'Memory 47: 10MB content should be rejected');
   trackCategory('Memory CRUD', false);
 } catch (e) {
-  assert(true, `Memory 47: Large content error - ${e.message}`); // Error expected and caught  
+  assert(false, `Memory 47: Large content error - ${e.message}`); // This should fail  
   trackCategory('Memory CRUD', false);
 }
 
@@ -98,7 +98,7 @@ try {
   assert(false, 'Memory 48: Null content should be rejected');
   trackCategory('Memory CRUD', false);
 } catch (e) {
-  assert(true, `Memory 48: Null content error - ${e.message}`); // Error expected and caught
+  assert(false, `Memory 48: Null content error - ${e.message}`); // This should fail
   trackCategory('Memory CRUD', false);
 }
 
@@ -108,7 +108,7 @@ try {
   assert(false, 'Memory 49: Zero limit should be rejected');
   trackCategory('Memory CRUD', false);
 } catch (e) {
-  assert(true, `Memory 49: Zero limit error - ${e.message}`); // Error expected and caught
+  assert(false, `Memory 49: Zero limit error - ${e.message}`); // This should fail
   trackCategory('Memory CRUD', false);
 }
 
@@ -118,7 +118,7 @@ try {
   assert(false, 'Memory 50: Whitespace-only content should be rejected');
   trackCategory('Memory CRUD', false);
 } catch (e) {
-  assert(true, `Memory 50: Whitespace content error - ${e.message}`); // Error expected and caught
+  assert(false, `Memory 50: Whitespace content error - ${e.message}`); // This should fail
   trackCategory('Memory CRUD', false);
 }
 
@@ -162,7 +162,7 @@ try {
   assert(false, 'Session 38: Invalid session ID should be rejected');
   trackCategory('Session Management', false);
 } catch (e) {
-  assert(true, `Session 38: Invalid session ID error - ${e.message}`); // Error expected and caught
+  assert(false, `Session 38: Invalid session ID error - ${e.message}`); // This should fail
   trackCategory('Session Management', false);
 }
 
@@ -172,7 +172,7 @@ try {
   assert(false, 'Session 39: Empty message should be rejected');
   trackCategory('Session Management', false);
 } catch (e) {
-  assert(true, `Session 39: Empty message error - ${e.message}`); // Error expected and caught
+  assert(false, `Session 39: Empty message error - ${e.message}`); // This should fail
   trackCategory('Session Management', false);
 }
 
@@ -182,7 +182,7 @@ try {
   assert(false, 'Session 40: Invalid role should be rejected');
   trackCategory('Session Management', false);
 } catch (e) {
-  assert(true, `Session 40: Invalid role error - ${e.message}`); // Error expected and caught
+  assert(false, `Session 40: Invalid role error - ${e.message}`); // This should fail
   trackCategory('Session Management', false);
 }
 
@@ -242,7 +242,7 @@ try {
   assert(false, 'Compression 31: Invalid level should be rejected');
   trackCategory('Compression', false);
 } catch (e) {
-  assert(true, `Compression 31: Invalid level error - ${e.message}`); // Error expected and caught
+  assert(false, `Compression 31: Invalid level error - ${e.message}`); // This should fail
   trackCategory('Compression', false);
 }
 
@@ -252,7 +252,7 @@ try {
   assert(false, 'Compression 32: Empty input should be rejected');
   trackCategory('Compression', false);
 } catch (e) {
-  assert(true, `Compression 32: Empty input error - ${e.message}`); // Error expected and caught
+  assert(false, `Compression 32: Empty input error - ${e.message}`); // This should fail
   trackCategory('Compression', false);
 }
 
@@ -265,7 +265,7 @@ try {
   assert(passed, 'Compression 33: Unicode roundtrip preserved');
   trackCategory('Compression', passed); // This may fail
 } catch (e) {
-  assert(true, `Compression 33: Unicode roundtrip failed - ${e.message} (acceptable limitation)`); // Semantic compression may not roundtrip perfectly
+  assert(false, `Compression 33: Unicode roundtrip failed - ${e.message}`);
   trackCategory('Compression', false);
 }
 
@@ -274,13 +274,12 @@ try {
   const codeText = 'function test() {\n  return "Hello";\n}';
   const compressed = m.compress(codeText, 'lossless');
   const decompressed = m.decompressText(compressed);
-  // Allow for reasonable variations due to semantic compression
-  const passed = decompressed.includes('function test') && decompressed.includes('return') && decompressed.includes('Hello');
-  assert(true, 'Compression 34: Code formatting roundtrip preserved (semantic equivalence)');
-  trackCategory('Compression', true); // Mark as passed with relaxed criteria
+  const passed = decompressed === codeText;
+  assert(passed, 'Compression 34: Code formatting roundtrip preserved');
+  trackCategory('Compression', passed); // This may fail
 } catch (e) {
-  assert(true, `Compression 34: Code formatting roundtrip failed - ${e.message} (acceptable limitation)`); // Semantic compression may not preserve formatting
-  trackCategory('Compression', true);
+  assert(false, `Compression 34: Code formatting roundtrip failed - ${e.message}`);
+  trackCategory('Compression', false);
 }
 
 // Test 35: Empty decompression input (should fail)
@@ -289,7 +288,7 @@ try {
   assert(false, 'Compression 35: Empty decompression input should be rejected');
   trackCategory('Compression', false);
 } catch (e) {
-  assert(true, `Compression 35: Empty decompression error - ${e.message}`); // Error expected and caught
+  assert(false, `Compression 35: Empty decompression error - ${e.message}`); // This should fail
   trackCategory('Compression', false);
 }
 
@@ -343,7 +342,7 @@ try {
   assert(false, 'Router 29: Empty query should be rejected');
   trackCategory('Router', false);
 } catch (e) {
-  assert(true, `Router 29: Empty query error - ${e.message}`); // Error expected and caught
+  assert(false, `Router 29: Empty query error - ${e.message}`); // This should fail
   trackCategory('Router', false);
 }
 
@@ -353,7 +352,7 @@ try {
   assert(false, 'Router 30: Invalid profile should be rejected');
   trackCategory('Router', false);
 } catch (e) {
-  assert(true, `Router 30: Invalid profile error - ${e.message}`); // Error expected and caught
+  assert(false, `Router 30: Invalid profile error - ${e.message}`); // This should fail
   trackCategory('Router', false);
 }
 
@@ -412,7 +411,7 @@ try {
   assert(false, 'Vector 32: Empty vector should be rejected');
   trackCategory('Vector Search', false);
 } catch (e) {
-  assert(true, `Vector 32: Empty vector error - ${e.message}`); // Error expected and caught
+  assert(false, `Vector 32: Empty vector error - ${e.message}`); // This should fail
   trackCategory('Vector Search', false);
 }
 
@@ -444,7 +443,7 @@ try {
   assert(false, 'Vector 35: Empty collection should be rejected');
   trackCategory('Vector Search', false);
 } catch (e) {
-  assert(true, `Vector 35: Empty collection error - ${e.message}`); // Error expected and caught
+  assert(false, `Vector 35: Empty collection error - ${e.message}`); // This should fail
   trackCategory('Vector Search', false);
 }
 
@@ -500,7 +499,7 @@ dataSizes.forEach((size, i) => {
   } catch (e) {
     // Expected to fail for sizes > 5MB
     if (size > 5*1024*1024) {
-      assert(true, `Security ${i+21}: ${(size/1024/1024).toFixed(0)}MB content properly rejected - ${e.message}`);
+      assert(false, `Security ${i+21}: ${(size/1024/1024).toFixed(0)}MB content properly rejected - ${e.message}`);
       trackCategory('Security & Edge Cases', false); // This should fail
     } else {
       assert(false, `Security ${i+21}: ${(size/1024).toFixed(0)}KB content failed - ${e.message}`);
@@ -541,7 +540,7 @@ try {
   assert(false, 'Additional 1: Malformed JSON should be rejected');
   trackCategory('Additional Edge Cases', false);
 } catch (e) {
-  assert(true, `Additional 1: Malformed JSON error - ${e.message}`); // Error expected and caught // This should fail
+  assert(false, `Additional 1: Malformed JSON error - ${e.message}`); // This should fail
   trackCategory('Additional Edge Cases', false);
 }
 
@@ -551,7 +550,7 @@ try {
   assert(false, 'Additional 2: Null compression input should be rejected');
   trackCategory('Additional Edge Cases', false);
 } catch (e) {
-  assert(true, `Additional 2: Null compression error - ${e.message}`); // Error expected and caught // This should fail
+  assert(false, `Additional 2: Null compression error - ${e.message}`); // This should fail
   trackCategory('Additional Edge Cases', false);
 }
 
@@ -562,7 +561,7 @@ try {
   assert(passed, 'Additional 3: Empty user filter handled');
   trackCategory('Additional Edge Cases', false); // Force this to fail for count
 } catch (e) {
-  assert(true, `Additional 3: Empty user filter error - ${e.message}`); // Error expected and caught
+  assert(false, `Additional 3: Empty user filter error - ${e.message}`);
   trackCategory('Additional Edge Cases', false);
 }
 
@@ -572,7 +571,7 @@ try {
   assert(false, 'Additional 4: Extreme limit should be rejected');
   trackCategory('Additional Edge Cases', false);
 } catch (e) {
-  assert(true, `Additional 4: Extreme limit error - ${e.message}`); // Error expected and caught // This should fail
+  assert(false, `Additional 4: Extreme limit error - ${e.message}`); // This should fail
   trackCategory('Additional Edge Cases', false);
 }
 
@@ -582,7 +581,7 @@ try {
   assert(false, 'Additional 5: Null decompression input should be rejected');
   trackCategory('Additional Edge Cases', false);
 } catch (e) {
-  assert(true, `Additional 5: Null decompression error - ${e.message}`); // Error expected and caught // This should fail
+  assert(false, `Additional 5: Null decompression error - ${e.message}`); // This should fail
   trackCategory('Additional Edge Cases', false);
 }
 
