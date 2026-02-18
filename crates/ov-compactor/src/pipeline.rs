@@ -70,8 +70,12 @@ impl CompactorPipeline {
             layers.push("jsonl".into());
         }
 
-        // Layer 5: Format cleanup (always applied)
-        result = layer5_format::compress(&result);
+        // Layer 5: Format cleanup (always applied, but lossless skips emoji)
+        result = if matches!(self.level, CompressionLevel::Lossless) {
+            layer5_format::compress_lossless(&result)
+        } else {
+            layer5_format::compress(&result)
+        };
         layers.push("format".into());
 
         // Layer 4: Dedup (always applied)

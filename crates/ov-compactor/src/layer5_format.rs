@@ -76,3 +76,13 @@ pub fn compress(text: &str) -> String {
     result = strip_redundant_whitespace(&result);
     result
 }
+
+/// Apply format cleanup without emoji stripping (for lossless mode).
+pub fn compress_lossless(text: &str) -> String {
+    if text.is_empty() { return String::new(); }
+    let mut result = normalize_chinese_punct(text);
+    result = strip_redundant_whitespace(&result);
+    result = remove_duplicate_lines(&result);
+    result = strip_redundant_whitespace(&result);
+    result
+}
