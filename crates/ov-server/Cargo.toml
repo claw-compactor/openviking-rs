@@ -13,3 +13,23 @@ serde_json = { workspace = true }
 tracing = { workspace = true }
 axum = { workspace = true }
 anyhow = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+
+[dev-dependencies]
+axum = { workspace = true }
+tokio = { version = "1", features = ["full", "test-util"] }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+hyper = { version = "1", features = ["full"] }
+
+[dev-dependencies.criterion]
+workspace = true
+
+[dev-dependencies.rand]
+workspace = true
+
+[[bench]]
+name = "bench_ov_server"
+harness = false
+

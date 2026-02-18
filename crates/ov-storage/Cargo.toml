@@ -17,3 +17,13 @@ async-recursion = "1"
 
 [dev-dependencies]
 tempfile = "3"
+
+[dev-dependencies.criterion]
+workspace = true
+
+[dev-dependencies.rand]
+workspace = true
+
+[[bench]]
+name = "bench_ov_storage"
+harness = false

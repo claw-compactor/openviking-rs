@@ -245,4 +245,93 @@ mod tests {
         let val = store.get("bin").await.unwrap().unwrap();
         assert_eq!(val, binary);
     }
+
+
+    // ========== Extended local_fs Tests ==========
+
+    #[test]
+    fn test_ensure_ovpack_already_has() {
+        assert_eq!(ensure_ovpack_extension("data.ovpack"), "data.ovpack");
+    }
+
+    #[test]
+    fn test_ensure_ovpack_no_extension() {
+        assert_eq!(ensure_ovpack_extension("mybackup"), "mybackup.ovpack");
+    }
+
+    #[test]
+    fn test_ensure_ovpack_other_extension() {
+        assert_eq!(ensure_ovpack_extension("data.zip"), "data.zip.ovpack");
+    }
+
+    #[test]
+    fn test_to_zip_safe_hidden_dirs() {
+        let result = to_zip_safe_path("base", ".hidden/file.txt");
+        assert_eq!(result, "base/_._hidden/file.txt");
+    }
+
+    #[test]
+    fn test_to_zip_safe_multiple_dots() {
+        let result = to_zip_safe_path("b", ".a/.b/.c");
+        assert_eq!(result, "b/_._a/_._b/_._c");
+    }
+
+    #[test]
+    fn test_from_zip_safe_empty() {
+        assert_eq!(from_zip_safe_path(""), "");
+    }
+
+    #[test]
+    fn test_from_zip_safe_single_component() {
+        assert_eq!(from_zip_safe_path("base"), "");
+    }
+
+    #[test]
+    fn test_zip_safe_roundtrip_complex() {
+        let original = ".config/.secrets/key.pem";
+        let safe = to_zip_safe_path("pkg", original);
+        let restored = from_zip_safe_path(&safe);
+        assert_eq!(restored, original);
+    }
+
+    #[test]
+    fn test_zip_safe_no_dots() {
+        let result = to_zip_safe_path("base", "normal/path/file.txt");
+        assert_eq!(result, "base/normal/path/file.txt");
+    }
+
+    #[tokio::test]
+    async fn test_kv_store_delete_then_get() {
+        let tmp = TempDir::new().unwrap();
+        let vfs = std::sync::Arc::new(VikingFS::new(tmp.path()));
+        vfs.mkdir("viking://kv").await.unwrap();
+        let store = FileKvStore::new(vfs, "viking://kv");
+        store.set("k", b"v").await.unwrap();
+        store.delete("k").await.unwrap();
+        assert!(store.get("k").await.unwrap().is_none());
+    }
+
+    #[tokio::test]
+    async fn test_kv_store_empty_value() {
+        let tmp = TempDir::new().unwrap();
+        let vfs = std::sync::Arc::new(VikingFS::new(tmp.path()));
+        vfs.mkdir("viking://kv").await.unwrap();
+        let store = FileKvStore::new(vfs, "viking://kv");
+        store.set("empty", b"").await.unwrap();
+        let val = store.get("empty").await.unwrap().unwrap();
+        assert!(val.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_kv_store_special_key_names() {
+        let tmp = TempDir::new().unwrap();
+        let vfs = std::sync::Arc::new(VikingFS::new(tmp.path()));
+        vfs.mkdir("viking://kv").await.unwrap();
+        let store = FileKvStore::new(vfs, "viking://kv");
+        store.set("key-with-dashes", b"v1").await.unwrap();
+        store.set("key_with_underscores", b"v2").await.unwrap();
+        assert!(store.get("key-with-dashes").await.unwrap().is_some());
+        assert!(store.get("key_with_underscores").await.unwrap().is_some());
+    }
+
 }

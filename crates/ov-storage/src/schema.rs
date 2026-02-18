@@ -130,7 +130,7 @@ mod tests {
     }
 
     #[test]
-    fn test_field_type_as_str() {
+    fn test_field_type_as_str_ext() {
         assert_eq!(FieldType::String.as_str(), "string");
         assert_eq!(FieldType::Vector.as_str(), "vector");
         assert_eq!(FieldType::Bool.as_str(), "bool");
@@ -147,7 +147,7 @@ mod tests {
     }
 
     #[test]
-    fn test_field_def_serde() {
+    fn test_field_def_serde_ext() {
         let f = FieldDef {
             name: "test".into(),
             field_type: FieldType::Vector,
@@ -158,4 +158,70 @@ mod tests {
         let f2: FieldDef = serde_json::from_str(&json).unwrap();
         assert_eq!(f2.dimension, Some(1024));
     }
+
+
+    #[test]
+    fn test_field_type_as_str_all() {
+        assert_eq!(FieldType::String.as_str(), "string");
+        assert_eq!(FieldType::Vector.as_str(), "vector");
+        assert_eq!(FieldType::Bool.as_str(), "bool");
+        assert_eq!(FieldType::Int64.as_str(), "int64");
+        assert_eq!(FieldType::Path.as_str(), "path");
+        assert_eq!(FieldType::DateTime.as_str(), "date_time");
+        assert_eq!(FieldType::SparseVector.as_str(), "sparse_vector");
+    }
+
+    #[test]
+    fn test_field_type_serde_roundtrip() {
+        let ft = FieldType::Vector;
+        let json = serde_json::to_string(&ft).unwrap();
+        let ft2: FieldType = serde_json::from_str(&json).unwrap();
+        assert_eq!(ft, ft2);
+    }
+
+    #[test]
+    fn test_field_def_serde_roundtrip() {
+        let fd = FieldDef {
+            name: "test".into(),
+            field_type: FieldType::String,
+            is_primary_key: false,
+            dimension: None,
+        };
+        let json = serde_json::to_string(&fd).unwrap();
+        let fd2: FieldDef = serde_json::from_str(&json).unwrap();
+        assert_eq!(fd2.name, "test");
+    }
+
+    #[test]
+    fn test_field_def_with_dim() {
+        let fd = FieldDef {
+            name: "vec".into(),
+            field_type: FieldType::Vector,
+            is_primary_key: false,
+            dimension: Some(128),
+        };
+        assert_eq!(fd.dimension, Some(128));
+    }
+
+    #[test]
+    fn test_field_def_primary_key() {
+        let fd = FieldDef {
+            name: "id".into(),
+            field_type: FieldType::Int64,
+            is_primary_key: true,
+            dimension: None,
+        };
+        assert!(fd.is_primary_key);
+    }
+
+    #[test]
+    fn test_all_field_types_roundtrip() {
+        for ft in [FieldType::String, FieldType::Vector, FieldType::SparseVector,
+                   FieldType::Path, FieldType::Bool, FieldType::Int64, FieldType::DateTime] {
+            let json = serde_json::to_string(&ft).unwrap();
+            let ft2: FieldType = serde_json::from_str(&json).unwrap();
+            assert_eq!(ft, ft2);
+        }
+    }
+
 }

@@ -1,9 +1,15 @@
 //! 14-dimension weighted classifier.
 
 use crate::types::{ScoringConfig, ScoringResult, Tier};
+use std::sync::LazyLock;
+use regex::Regex;
 
-
-
+static MULTI_STEP_PATTERNS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
+    ["first.*then", "step \\d", "\\d+\\.\\s"]
+        .iter()
+        .map(|p| Regex::new(p).unwrap())
+        .collect()
+});
 
 struct DimensionScore {
     name: String,
@@ -39,8 +45,7 @@ fn score_keywords(
 }
 
 fn score_multi_step(text: &str) -> DimensionScore {
-    let patterns = ["first.*then", "step \\d", "\\d+\\.\\s"];
-    let hits = patterns.iter().filter(|p| regex::Regex::new(p).map(|r| r.is_match(text)).unwrap_or(false)).count();
+    let hits = MULTI_STEP_PATTERNS.iter().filter(|r| r.is_match(text)).count();
     if hits > 0 {
         DimensionScore { name: "multiStepPatterns".into(), score: 0.5, signal: Some("multi-step".into()) }
     } else {

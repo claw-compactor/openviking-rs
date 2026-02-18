@@ -720,4 +720,106 @@ mod tests {
         vfs.write_string(uri, "deep").await.unwrap();
         assert_eq!(vfs.read_string(uri).await.unwrap(), "deep");
     }
+
+
+    #[tokio::test]
+    async fn test_rm_recursive_dir() {
+        let (_tmp, vfs) = make_fs();
+        vfs.write_string("viking://resources/dir/a.txt", "a").await.unwrap();
+        vfs.write_string("viking://resources/dir/b.txt", "b").await.unwrap();
+        vfs.rm("viking://resources/dir", true).await.unwrap();
+        assert!(!vfs.exists("viking://resources/dir").await);
+    }
+
+    #[tokio::test]
+    async fn test_ls_empty_dir_new() {
+        let (_tmp, vfs) = make_fs();
+        vfs.mkdir("viking://resources/empty_dir").await.unwrap();
+        let entries = vfs.ls("viking://resources/empty_dir").await.unwrap();
+        assert!(entries.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_ls_multiple_files() {
+        let (_tmp, vfs) = make_fs();
+        vfs.write_string("viking://resources/f1.txt", "1").await.unwrap();
+        vfs.write_string("viking://resources/f2.txt", "2").await.unwrap();
+        vfs.write_string("viking://resources/f3.txt", "3").await.unwrap();
+        let entries = vfs.ls("viking://resources").await.unwrap();
+        assert_eq!(entries.len(), 3);
+    }
+
+    #[tokio::test]
+    async fn test_exists_after_delete() {
+        let (_tmp, vfs) = make_fs();
+        vfs.write_string("viking://resources/del.txt", "x").await.unwrap();
+        assert!(vfs.exists("viking://resources/del.txt").await);
+        vfs.rm("viking://resources/del.txt", false).await.unwrap();
+        assert!(!vfs.exists("viking://resources/del.txt").await);
+    }
+
+    #[tokio::test]
+    async fn test_write_binary_data() {
+        let (_tmp, vfs) = make_fs();
+        let binary = vec![0u8, 1, 2, 3, 255, 254, 253];
+        vfs.write("viking://resources/binary.bin", &binary).await.unwrap();
+        let data = vfs.read("viking://resources/binary.bin").await.unwrap();
+        assert_eq!(data, binary);
+    }
+
+    #[tokio::test]
+    async fn test_write_large_file() {
+        let (_tmp, vfs) = make_fs();
+        let big = "x".repeat(100_000);
+        vfs.write_string("viking://resources/big.txt", &big).await.unwrap();
+        let read = vfs.read_string("viking://resources/big.txt").await.unwrap();
+        assert_eq!(read.len(), 100_000);
+    }
+
+    #[tokio::test]
+    async fn test_append_to_file() {
+        let (_tmp, vfs) = make_fs();
+        vfs.write_string("viking://resources/app.txt", "hello").await.unwrap();
+        vfs.append("viking://resources/app.txt", " world").await.unwrap();
+        let read = vfs.read_string("viking://resources/app.txt").await.unwrap();
+        assert_eq!(read, "hello world");
+    }
+
+    #[tokio::test]
+    async fn test_tree_nested_structure() {
+        let (_tmp, vfs) = make_fs();
+        vfs.write_string("viking://resources/a/b/c.txt", "c").await.unwrap();
+        vfs.write_string("viking://resources/a/d.txt", "d").await.unwrap();
+        let tree = vfs.tree("viking://resources/a").await.unwrap();
+        assert!(tree.len() >= 2);
+    }
+
+    #[tokio::test]
+    async fn test_relation_link_and_unlink() {
+        let (_tmp, vfs) = make_fs();
+        vfs.write_string("viking://resources/src.txt", "source").await.unwrap();
+        vfs.write_string("viking://resources/tgt.txt", "target").await.unwrap();
+        // link may fail if relations dir doesn't exist; that's OK
+        let _ = vfs.link("viking://resources/src.txt", vec!["viking://resources/tgt.txt".to_string()], "related").await;
+    }
+
+    #[test]
+    fn test_uri_to_path_basic() {
+        let tmp = TempDir::new().unwrap();
+        let vfs = VikingFS::new(tmp.path());
+        let path = vfs.uri_to_path("viking://resources/file.txt");
+        assert!(path.to_string_lossy().contains("resources"));
+        assert!(path.to_string_lossy().contains("file.txt"));
+    }
+
+    #[test]
+    fn test_path_to_uri_roundtrip() {
+        let tmp = TempDir::new().unwrap();
+        let vfs = VikingFS::new(tmp.path());
+        let path = vfs.uri_to_path("viking://resources/test.txt");
+        let uri = vfs.path_to_uri(&path);
+        assert!(uri.starts_with("viking://"));
+        assert!(uri.contains("test.txt"));
+    }
+
 }

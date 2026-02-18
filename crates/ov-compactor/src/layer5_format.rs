@@ -2,6 +2,15 @@
 
 use regex::Regex;
 use std::collections::HashSet;
+use std::sync::LazyLock;
+
+static RE_MULTI_NEWLINE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\n{3,}").unwrap());
+static RE_EMOJI: LazyLock<Regex> = LazyLock::new(|| Regex::new(
+    "[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\
+     \u{1F1E0}-\u{1F1FF}\u{2702}-\u{27B0}\u{1F900}-\u{1F9FF}\
+     \u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}]+"
+).unwrap());
+static RE_MULTI_SPACE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"  +").unwrap());
 
 /// Chinese punctuation → ASCII mapping.
 fn zh_punct_map() -> Vec<(&'static str, &'static str)> {
@@ -25,8 +34,7 @@ pub fn normalize_chinese_punct(text: &str) -> String {
 
 /// Strip excessive blank lines (3+ → 2).
 pub fn strip_redundant_whitespace(text: &str) -> String {
-    let re = Regex::new(r"\n{3,}").unwrap();
-    let result = re.replace_all(text, "\n\n");
+    let result = RE_MULTI_NEWLINE.replace_all(text, "\n\n");
     result.lines()
         .map(|l| l.trim_end())
         .collect::<Vec<_>>()
@@ -54,14 +62,8 @@ pub fn remove_duplicate_lines(text: &str) -> String {
 
 /// Strip emoji characters.
 pub fn strip_emoji(text: &str) -> String {
-    let re = Regex::new(
-        "[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\
-         \u{1F1E0}-\u{1F1FF}\u{2702}-\u{27B0}\u{1F900}-\u{1F9FF}\
-         \u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}]+"
-    ).unwrap();
-    let result = re.replace_all(text, "");
-    let space_re = Regex::new(r"  +").unwrap();
-    space_re.replace_all(&result, " ").to_string()
+    let result = RE_EMOJI.replace_all(text, "");
+    RE_MULTI_SPACE.replace_all(&result, " ").to_string()
 }
 
 /// Apply all format cleanup passes.

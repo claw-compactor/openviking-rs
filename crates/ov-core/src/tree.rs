@@ -303,4 +303,65 @@ mod tests {
         let tree = BuildingTree::default();
         assert!(tree.is_empty());
     }
+
+
+    // ========== Extended Tree Tests ==========
+
+    #[test]
+    fn test_tree_many_contexts() {
+        let mut tree = BuildingTree::new();
+        for i in 0..50 {
+            tree.add_context(Context::new(
+                format!("viking://resources/item_{}", i),
+                format!("Item {}", i),
+            ));
+        }
+        assert_eq!(tree.len(), 50);
+    }
+
+    #[test]
+    fn test_tree_get_nonexistent() {
+        let tree = BuildingTree::new();
+        assert!(tree.get("viking://nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_tree_root_not_set() {
+        let tree = BuildingTree::new();
+        assert!(tree.root().is_none());
+    }
+
+    #[test]
+    fn test_tree_root_set() {
+        let mut tree = BuildingTree::new();
+        tree.add_context(Context::new("viking://root", "Root"));
+        tree.set_root("viking://root");
+        assert!(tree.root().is_some());
+        assert_eq!(tree.root().unwrap().uri, "viking://root");
+    }
+
+    #[test]
+    fn test_tree_children_empty() {
+        let tree = make_tree();
+        let children = tree.children("viking://resources/doc/section1");
+        assert!(children.is_empty()); // leaf node has no children
+    }
+
+    #[test]
+    fn test_tree_duplicate_uri_overwrites() {
+        let mut tree = BuildingTree::new();
+        tree.add_context(Context::new("viking://a", "First"));
+        tree.add_context(Context::new("viking://a", "Second"));
+        // Should have 2 entries but uri_map points to last
+        let ctx = tree.get("viking://a").unwrap();
+        assert_eq!(ctx.abstract_text.as_str(), "Second");
+    }
+
+    #[test]
+    fn test_tree_contexts_slice() {
+        let tree = make_tree();
+        let ctxs = tree.contexts();
+        assert_eq!(ctxs.len(), 3);
+    }
+
 }

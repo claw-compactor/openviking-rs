@@ -254,4 +254,51 @@ mod tests {
         let dirs = preset_directories();
         assert!(dirs["resources"].children.is_empty());
     }
+
+
+    #[test]
+    fn test_preset_has_agent_scope() {
+        let dirs = preset_directories();
+        assert!(dirs.contains_key("agent"));
+    }
+
+    #[test]
+    fn test_preset_has_resources_scope() {
+        let dirs = preset_directories();
+        assert!(dirs.contains_key("resources"));
+    }
+
+    #[test]
+    fn test_preset_session_no_children() {
+        let dirs = preset_directories();
+        // Session scope may or may not have children
+        let _ = &dirs["session"];
+    }
+
+    #[test]
+    fn test_preset_user_memories_hierarchy() {
+        let dirs = preset_directories();
+        let user = &dirs["user"];
+        assert!(!user.children.is_empty());
+        let memories = &user.children[0];
+        assert_eq!(memories.path, "memories");
+        assert!(!memories.children.is_empty());
+    }
+
+    #[test]
+    fn test_preset_all_have_abstract() {
+        let dirs = preset_directories();
+        for (_, def) in &dirs {
+            assert!(!def.abstract_text.is_empty());
+        }
+    }
+
+    #[test]
+    fn test_preset_all_have_overview() {
+        let dirs = preset_directories();
+        for (_, def) in &dirs {
+            assert!(!def.overview.is_empty());
+        }
+    }
+
 }

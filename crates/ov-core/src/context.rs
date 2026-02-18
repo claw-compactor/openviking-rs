@@ -631,4 +631,84 @@ mod tests {
         let ct = Context::derive_context_type("viking://session/123");
         assert_eq!(ct, ContextType::Resource);
     }
+
+    // ========== Extended Context Tests ==========
+
+    #[test]
+    fn test_context_builder_with_all_fields() {
+        let ctx = Context::builder("viking://resources/full")
+            .abstract_text("Full context")
+            .context_type(ContextType::Resource)
+            .is_leaf(true)
+            .build();
+        assert_eq!(ctx.uri, "viking://resources/full");
+        assert_eq!(ctx.abstract_text.as_str(), "Full context");
+        assert!(ctx.is_leaf);
+    }
+
+    #[test]
+    fn test_context_derive_type_memory() {
+        let ct = Context::derive_context_type("viking://user/memories/preferences/theme");
+        assert_eq!(ct, ContextType::Memory);
+    }
+
+    #[test]
+    fn test_context_derive_type_resource() {
+        let ct = Context::derive_context_type("viking://resources/doc.md");
+        assert_eq!(ct, ContextType::Resource);
+    }
+
+    #[test]
+    fn test_context_derive_type_skill() {
+        let ct = Context::derive_context_type("viking://agent/skills/search");
+        assert_eq!(ct, ContextType::Skill);
+    }
+
+    #[test]
+    fn test_context_empty_abstract() {
+        let ctx = Context::new("viking://resources/empty", "");
+        assert_eq!(ctx.abstract_text.as_str(), "");
+    }
+
+    #[test]
+    fn test_context_very_long_abstract() {
+        let big = "x".repeat(50_000);
+        let ctx = Context::new("viking://resources/big", &big);
+        assert_eq!(ctx.abstract_text.as_str().len(), 50_000);
+    }
+
+    #[test]
+    fn test_context_unicode_uri() {
+        let ctx = Context::new("viking://resources/日本語/テスト", "Unicode");
+        assert!(ctx.uri.contains("日本語"));
+    }
+
+    #[test]
+    fn test_context_type_display_all() {
+        assert_eq!(ContextType::Resource.to_string(), "resource");
+        assert_eq!(ContextType::Memory.to_string(), "memory");
+        assert_eq!(ContextType::Skill.to_string(), "skill");
+    }
+
+    #[test]
+    fn test_context_multiple_related_uris() {
+        let mut ctx = Context::new("viking://resources/a", "A");
+        ctx.related_uri.push("viking://resources/b".into());
+        ctx.related_uri.push("viking://resources/c".into());
+        ctx.related_uri.push("viking://resources/d".into());
+        assert_eq!(ctx.related_uri.len(), 3);
+    }
+
+    #[test]
+    fn test_context_meta_nested_json() {
+        let mut ctx = Context::new("viking://resources/meta", "Meta test");
+        ctx.meta.insert("nested".into(), serde_json::json!({"a": {"b": 1}}));
+        let json = serde_json::to_string(&ctx).unwrap();
+        let ctx2: Context = serde_json::from_str(&json).unwrap();
+        assert_eq!(ctx2.meta["nested"]["a"]["b"], 1);
+    }
+
+
+
+
 }

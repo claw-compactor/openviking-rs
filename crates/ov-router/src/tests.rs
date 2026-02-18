@@ -271,3 +271,94 @@ fn test_route_performance() {
     }
     assert!(start.elapsed().as_millis() < 2000);
 }
+
+// ========== Extended Router Tests ==========
+
+#[test]
+fn test_scoring_code_keywords() {
+    let c = cfg();
+    let r = classify_by_rules("implement refactor debug deploy test", None, 100, &c.scoring);
+    assert!(r.score > 0.0);
+}
+
+#[test]
+fn test_scoring_simple_greeting() {
+    let c = cfg();
+    let r = classify_by_rules("hi", None, 5, &c.scoring);
+    assert!(r.tier == Some(Tier::Simple) || r.score < 0.0);
+}
+
+#[test]
+fn test_route_with_system_prompt() {
+    let c = cfg();
+    let d = route("hello", Some("You are a helpful assistant"), 100, &c, RoutingProfile::Auto);
+    assert!(!d.model.is_empty());
+}
+
+#[test]
+fn test_route_all_profiles() {
+    let c = cfg();
+    for profile in [RoutingProfile::Auto, RoutingProfile::Eco, RoutingProfile::Premium] {
+        let d = route("test query", None, 100, &c, profile);
+        assert!(!d.model.is_empty());
+    }
+}
+
+#[test]
+fn test_scoring_single_char() {
+    let c = cfg();
+    let r = classify_by_rules("?", None, 1, &c.scoring);
+    // Should not panic and should classify
+    assert!(r.confidence >= 0.0);
+}
+
+#[test]
+fn test_agentic_file_operations() {
+    let c = cfg();
+    let r = classify_by_rules(
+        "create a file, write content to it, then read it back and verify",
+        None, 100, &c.scoring,
+    );
+    assert!(r.agentic_score >= 0.0);
+}
+
+#[test]
+fn test_scoring_comparison() {
+    let c = cfg();
+    let r = classify_by_rules("compare and contrast X vs Y, trade-offs", None, 50, &c.scoring);
+    let _ = r.signals;
+}
+
+#[test]
+fn test_tier_ordering() {
+    assert!((Tier::Simple as u8) < (Tier::Medium as u8));
+    assert!((Tier::Medium as u8) < (Tier::Complex as u8));
+}
+
+#[test]
+fn test_fallback_chain_simple() {
+    let c = cfg();
+    let chain = get_fallback_chain(Tier::Simple, &c.tiers);
+    assert!(!chain.is_empty());
+}
+
+#[test]
+fn test_fallback_chain_reasoning() {
+    let c = cfg();
+    let chain = get_fallback_chain(Tier::Reasoning, &c.tiers);
+    assert!(!chain.is_empty());
+}
+
+#[test]
+fn test_route_unicode_query() {
+    let c = cfg();
+    let d = route("\u{5b9e}\u{73b0}\u{4e00}\u{4e2a}REST API", None, 100, &c, RoutingProfile::Auto);
+    assert!(!d.model.is_empty());
+}
+
+#[test]
+fn test_route_empty_query() {
+    let c = cfg();
+    let d = route("", None, 0, &c, RoutingProfile::Auto);
+    assert!(!d.model.is_empty());
+}

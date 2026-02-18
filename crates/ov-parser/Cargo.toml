@@ -13,3 +13,13 @@ regex = "1"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }
+
+[dev-dependencies.criterion]
+workspace = true
+
+[dev-dependencies.rand]
+workspace = true
+
+[[bench]]
+name = "bench_ov_parser"
+harness = false

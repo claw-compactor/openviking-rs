@@ -263,4 +263,38 @@ mod tests {
         let skill2: Skill = serde_json::from_str(&json).unwrap();
         assert_eq!(skill, skill2);
     }
+
+
+    #[test]
+    fn test_skill_parse_empty_content() {
+        let result = SkillLoader::parse("", "test.md");
+        // Should handle empty input gracefully
+        let _ = result;
+    }
+
+    #[test]
+    fn test_skill_parse_no_frontmatter() {
+        let result = SkillLoader::parse("Just some text", "test.md");
+        let _ = result;
+    }
+
+    #[test]
+    fn test_skill_parse_unicode() {
+        let md = "---
+name: test
+description: unicode test
+---
+# Chinese content
+
+some body";
+        let result = SkillLoader::parse(md, "test.md");
+        let _ = result;
+    }
+
+    #[test]
+    fn test_skill_load_nonexistent() {
+        let result = SkillLoader::load("/nonexistent/skill.md");
+        assert!(result.is_err());
+    }
+
 }

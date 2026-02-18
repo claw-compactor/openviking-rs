@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "lib"]
 
 [dependencies]
 ov-core = { path = "../ov-core" }
@@ -18,6 +18,8 @@ napi-derive = "2"
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
 
 [build-dependencies]
 napi-build = "2"

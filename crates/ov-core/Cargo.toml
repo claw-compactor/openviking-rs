@@ -12,3 +12,13 @@ uuid = { workspace = true }
 chrono = { workspace = true }
 tracing = { workspace = true }
 dirs = "5"
+
+[dev-dependencies.criterion]
+workspace = true
+
+[dev-dependencies.rand]
+workspace = true
+
+[[bench]]
+name = "bench_ov_core"
+harness = false

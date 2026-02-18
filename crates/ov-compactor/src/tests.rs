@@ -408,3 +408,124 @@ fn test_level_switch() {
     assert!(balanced.compressed_len <= minimal.compressed_len);
     assert!(minimal.compressed_len <= lossless.compressed_len);
 }
+
+// ========== Extended Compactor Tests ==========
+
+#[test]
+fn test_pipeline_all_levels() {
+    let text = "{\"role\":\"user\",\"content\":\"Hello world\",\"timestamp\":\"2024\"}";
+    for pipeline in [CompactorPipeline::lossless(), CompactorPipeline::minimal(), CompactorPipeline::balanced()] {
+        let result = pipeline.compress(text);
+        assert!(!result.output.is_empty());
+    }
+}
+
+#[test]
+fn test_l1_array_values_ext() {
+    let line = "{\"role\":\"user\",\"content\":\"hi\",\"tools\":[\"a\",\"b\"]}";
+    let result = layer1_jsonl::compress_line(line);
+    assert!(result.contains("content"));
+}
+
+#[test]
+fn test_l2_boundary_single() {
+    let result = layer2_ccp::compress("word");
+    assert_eq!(result, "word");
+}
+
+#[test]
+fn test_l2_repeated_pattern_ext() {
+    let text = "The function takes a parameter. The function takes a parameter.";
+    let result = layer2_ccp::compress(text);
+    assert!(!result.is_empty());
+}
+
+#[test]
+fn test_l3_single_code() {
+    let codes = layer3_dictionary::generate_codes(1);
+    assert_eq!(codes.len(), 1);
+}
+
+#[test]
+fn test_l3_many_codes_ext() {
+    let codes = layer3_dictionary::generate_codes(1000);
+    assert_eq!(codes.len(), 1000);
+    let set: std::collections::HashSet<_> = codes.iter().collect();
+    assert_eq!(set.len(), 1000);
+}
+
+#[test]
+fn test_l4_identical_text_ext() {
+    let text = "hello\nhello\nhello";
+    let result = layer4_dedup::compress(text);
+    assert!(!result.is_empty());
+}
+
+#[test]
+fn test_l4_different_text_ext() {
+    let text = "alpha\nbravo\ncharlie";
+    let result = layer4_dedup::compress(text);
+    assert!(result.contains("alpha"));
+    assert!(result.contains("bravo"));
+}
+
+#[test]
+fn test_l5_double_spaces_ext() {
+    let result = layer5_format::strip_redundant_whitespace("hello  world   foo");
+    assert!(result.len() <= 18);
+}
+
+#[test]
+fn test_l5_dup_lines_ext() {
+    let text = "line1\nline1\nline2\nline2\nline2";
+    let result = layer5_format::remove_duplicate_lines(text);
+    assert_eq!(result.lines().count(), 2);
+}
+
+#[test]
+fn test_pipeline_short_text_ext() {
+    let p = CompactorPipeline::balanced();
+    let result = p.compress("hi");
+    assert!(!result.output.is_empty());
+}
+
+#[test]
+fn test_pipeline_newlines_ext() {
+    let p = CompactorPipeline::lossless();
+    let result = p.compress("\n\n\n\n");
+    let _ = result;
+}
+
+#[test]
+fn test_pipeline_repeated_jsonl_ext() {
+    let mut text = String::new();
+    for i in 0..100 {
+        text.push_str(&format!("{{\"role\":\"user\",\"content\":\"msg {}\"}}\n", i));
+    }
+    let p = CompactorPipeline::minimal();
+    let result = p.compress(&text);
+    assert!(!result.output.is_empty());
+}
+
+#[test]
+fn test_pipeline_ratio_positive() {
+    let big = "The quick brown fox jumps over the lazy dog. ".repeat(100);
+    let p = CompactorPipeline::balanced();
+    let result = p.compress(&big);
+    assert!(result.ratio() >= 0.0);
+}
+
+#[test]
+fn test_l2_roundtrip_ext() {
+    let original = "The configuration parameter defines the behavior";
+    let compressed = layer2_ccp::compress(original);
+    let decompressed = layer2_ccp::decompress(&compressed);
+    assert!(!decompressed.is_empty());
+}
+
+#[test]
+fn test_l5_chinese_punct_conversion() {
+    let text = "\u{ff0c}\u{3002}";
+    let result = layer5_format::normalize_chinese_punct(text);
+    assert!(!result.is_empty());
+}

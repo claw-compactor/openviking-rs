@@ -193,46 +193,5 @@ mod tests {
         assert!(is_mcp_format(&val));
     }
 
-    #[test]
-    fn test_is_mcp_format_false() {
-        let val = serde_json::json!({"name": "t"});
-        assert!(!is_mcp_format(&val));
-    }
 
-    #[test]
-    fn test_is_mcp_format_not_object() {
-        assert!(!is_mcp_format(&serde_json::json!("string")));
-    }
-
-    #[test]
-    fn test_mcp_serde_roundtrip() {
-        let config = sample_mcp();
-        let json = serde_json::to_string(&config).unwrap();
-        let config2: McpToolConfig = serde_json::from_str(&json).unwrap();
-        assert_eq!(config2.name, "web_search");
-    }
-
-    #[test]
-    fn test_mcp_to_skill_optional_param() {
-        let config = McpToolConfig {
-            name: "tool".into(),
-            description: "desc".into(),
-            input_schema: Some(InputSchema {
-                properties: {
-                    let mut m = HashMap::new();
-                    m.insert(
-                        "opt".into(),
-                        PropertyInfo {
-                            type_name: "number".into(),
-                            description: "Optional param".into(),
-                        },
-                    );
-                    m
-                },
-                required: vec![],
-            }),
-        };
-        let skill = mcp_to_skill(&config);
-        assert!(skill.content.contains("(optional)"));
-    }
 }

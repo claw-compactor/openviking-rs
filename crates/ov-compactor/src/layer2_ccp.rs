@@ -1,6 +1,8 @@
 //! Layer 2: CCP (Context Compression Protocol) — abbreviate technical terms.
 
 use std::collections::HashMap;
+use std::sync::LazyLock;
+use regex::Regex;
 
 /// Build the default CCP abbreviation map.
 pub fn default_abbreviations() -> HashMap<&'static str, &'static str> {
@@ -56,9 +58,44 @@ pub fn default_abbreviations() -> HashMap<&'static str, &'static str> {
     m
 }
 
+struct CachedRegexMap {
+    /// (regex, replacement) sorted by key length descending
+    compress_pairs: Vec<(Regex, &'static str)>,
+    /// (regex, replacement) sorted by value length descending
+    decompress_pairs: Vec<(Regex, &'static str)>,
+}
+
+static DEFAULT_REGEX_MAP: LazyLock<CachedRegexMap> = LazyLock::new(|| {
+    let abbrevs = default_abbreviations();
+    let mut sorted: Vec<_> = abbrevs.iter().map(|(k, v)| (*k, *v)).collect::<Vec<(&str, &str)>>();
+    sorted.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
+
+    let compress_pairs: Vec<_> = sorted.iter().map(|(long, short)| {
+        let pattern = format!(r"(?i)\b{}\b", regex::escape(long));
+        (Regex::new(&pattern).unwrap(), *short)
+    }).collect();
+
+    let mut reverse: Vec<_> = abbrevs.iter().map(|(k, v)| (*v, *k)).collect();
+    reverse.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
+
+    let decompress_pairs: Vec<_> = reverse.iter().map(|(short, long)| {
+        let pattern = format!(r"(?i)\b{}\b", regex::escape(short));
+        (Regex::new(&pattern).unwrap(), *long)
+    }).collect();
+
+    CachedRegexMap { compress_pairs, decompress_pairs }
+});
+
 /// Apply CCP abbreviations to text.
 pub fn compress(text: &str) -> String {
-    compress_with_map(text, &default_abbreviations())
+    if text.is_empty() {
+        return String::new();
+    }
+    let mut result = text.to_string();
+    for (re, short) in &DEFAULT_REGEX_MAP.compress_pairs {
+        result = re.replace_all(&result, *short).to_string();
+    }
+    result
 }
 
 /// Apply custom abbreviation map.
@@ -69,14 +106,14 @@ pub fn compress_with_map(text: &str, abbrevs: &HashMap<&str, &str>) -> String {
 
     let mut result = text.to_string();
     // Sort by length descending to avoid partial matches
-    let mut sorted: Vec<_> = abbrevs.iter().collect();
+    let mut sorted: Vec<_> = abbrevs.iter().map(|(k, v)| (*k, *v)).collect::<Vec<(&str, &str)>>();
     sorted.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
 
     for (long, short) in sorted {
         // Case-insensitive word boundary replacement
         let pattern = format!(r"(?i)\b{}\b", regex::escape(long));
         if let Ok(re) = regex::Regex::new(&pattern) {
-            result = re.replace_all(&result, *short).to_string();
+            result = re.replace_all(&result, short).to_string();
         }
     }
     result
@@ -84,7 +121,14 @@ pub fn compress_with_map(text: &str, abbrevs: &HashMap<&str, &str>) -> String {
 
 /// Expand CCP abbreviations (reverse).
 pub fn decompress(text: &str) -> String {
-    decompress_with_map(text, &default_abbreviations())
+    if text.is_empty() {
+        return String::new();
+    }
+    let mut result = text.to_string();
+    for (re, long) in &DEFAULT_REGEX_MAP.decompress_pairs {
+        result = re.replace_all(&result, *long).to_string();
+    }
+    result
 }
 
 /// Expand with custom map.

@@ -18,3 +18,10 @@ parking_lot = "0.12"
 ordered-float = "4"
 byteorder = "1"
 tempfile = "3"
+
+[dev-dependencies.criterion]
+workspace = true
+
+[[bench]]
+name = "bench_ov_vectordb"
+harness = false

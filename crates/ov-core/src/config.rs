@@ -383,3 +383,79 @@ mod tests {
         assert_eq!(cfg, OpenVikingConfig::default());
     }
 }
+
+    // ========== Extended Config Tests ==========
+
+    #[test]
+    fn test_config_full_json() {
+        let json = r#"{
+            "storage": { "vectordb": { "name": "mydb", "backend": "flat" } },
+            "embedding": { "dimension": 768, "provider": "huggingface", "model": "bge-small" },
+            "server": { "host": "127.0.0.1", "port": 9090 },
+            "agfs": { "url": "http://agfs:3000", "timeout": 30 },
+            "rerank": { "enabled": false, "top_k": 5 }
+        }"#;
+        let cfg: OpenVikingConfig = serde_json::from_str(json).unwrap();
+        assert_eq!(cfg.storage.vectordb.name, "mydb");
+        assert_eq!(cfg.storage.vectordb.backend, "flat");
+        assert_eq!(cfg.embedding.dimension, 768);
+        assert_eq!(cfg.embedding.provider, "huggingface");
+        assert_eq!(cfg.server.host, "127.0.0.1");
+        assert_eq!(cfg.server.port, 9090);
+        assert_eq!(cfg.agfs.url, "http://agfs:3000");
+        assert_eq!(cfg.agfs.timeout, 30);
+        assert!(!cfg.rerank.enabled);
+        assert_eq!(cfg.rerank.top_k, 5);
+    }
+
+    #[test]
+    fn test_config_roundtrip_json() {
+        let cfg = OpenVikingConfig::default();
+        let json = serde_json::to_string(&cfg).unwrap();
+        let cfg2: OpenVikingConfig = serde_json::from_str(&json).unwrap();
+        assert_eq!(cfg, cfg2);
+    }
+
+    #[test]
+    fn test_validate_negative_dimension() {
+        // dimension is usize, so can't be negative in Rust
+        // but 0 should fail
+        let mut cfg = OpenVikingConfig::default();
+        cfg.embedding.dimension = 0;
+        assert!(validate_config(&cfg).is_err());
+    }
+
+    #[test]
+    fn test_validate_valid_config() {
+        let cfg = OpenVikingConfig::default();
+        assert!(validate_config(&cfg).is_ok());
+    }
+
+    #[test]
+    fn test_config_extra_fields_ignored() {
+        let json = r#"{"unknown_field": true, "storage": {}}"#;
+        let cfg: std::result::Result<OpenVikingConfig, _> = serde_json::from_str(json);
+        // Should either work (ignoring extra) or fail gracefully
+        let _ = cfg;
+    }
+
+    #[test]
+    fn test_vectordb_config_defaults() {
+        let cfg = VectorDbConfig::default();
+        assert_eq!(cfg.name, "openviking");
+        assert_eq!(cfg.backend, "hnsw");
+    }
+
+    #[test]
+    fn test_embedding_config_defaults() {
+        let cfg = EmbeddingConfig::default();
+        assert_eq!(cfg.dimension, 1024);
+        assert_eq!(cfg.provider, "openai");
+    }
+
+    #[test]
+    fn test_server_config_defaults() {
+        let cfg = ServerConfig::default();
+        assert_eq!(cfg.host, "0.0.0.0");
+        assert_eq!(cfg.port, 8080);
+    }

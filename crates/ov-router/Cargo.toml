@@ -11,3 +11,13 @@ regex = "1"
 
 [dev-dependencies]
 tokio = { workspace = true }
+
+[dev-dependencies.criterion]
+workspace = true
+
+[dev-dependencies.rand]
+workspace = true
+
+[[bench]]
+name = "bench_ov_router"
+harness = false
