@@ -1,0 +1,13 @@
+{
+  "name": "memory-openviking",
+  "version": "1.0.0",
+  "description": "OpenViking-rs based memory search plugin",
+  "main": "index.ts",
+  "type": "module",
+  "peerDependencies": {
+    "openclaw": "*"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.48"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "memory-openviking",
+  "name": "Memory (OpenViking)",
+  "description": "OpenViking-rs based memory search with Rust native performance",
+  "kind": "memory",
+  "version": "1.0.0",
+  "author": "OpenClaw",
+  "main": "index.ts",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
